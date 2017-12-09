@@ -5,33 +5,36 @@
         "location": "New York",
         "coord": "150x150",
         "url": "192.168.1.101",
-        "online": true
+        "online": null
      },
      {
         "id": 2,
         "location": "London",
         "coord": "200x150",
         "url": "192.168.1.102",
-        "online": true
+        "online": null
      },
      {
         "id": 3,
         "location": "Amsterdam",
         "coord": "300x150",
-        "url": "192.168.1.103",
-        "online": true
+        "url": "10.10.1.90",
+        "online": null
      },
      {
         "id": 4,
         "location": "Paris",
         "coord": "300x150",
-        "url": "192.168.1.104"
+        "url": "192.168.1.104",
+        "online": null
+        
      },
      {
         "id": 5,
         "location": "Singapore",
         "coord": "300x150",
-        "url": "192.168.1.105"
+        "url": "192.168.1.105",
+        "online": null
      }
   ]
 }
