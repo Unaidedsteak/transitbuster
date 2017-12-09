@@ -102,21 +102,46 @@ import * as d3 from 'd3-dsv'
 import data from './data.json'
 
   export default {
-    data: () => ({
-      drawer: null,
-      headers: [
-        {text: 'ID', value: 'id', align: 'left'},
-        {text: 'Location', value: 'location', align: 'left'},
-        {text: 'Online', value: null, align: 'left'}
-      ],
-      satelliteData: []
-    }),
+    data: function () {
+      return {
+        drawer: null,
+        headers: [
+          {text: 'ID', value: 'id', align: 'left'},
+          {text: 'Location', value: 'location', align: 'left'},
+          {text: 'Online', value: null, align: 'left'}
+        ],
+        satelliteData: []
+      }
+    },
     mounted() {
       var self = this
-      for(let sat in data.satellites) {
-        console.log(sat.id)
-      }
       self.satelliteData = data.satellites
+      let storedData = []
+      for(let sat in data.satellites) {
+        let satellite = data.satellites[sat]
+        console.log('Satellite: ' + JSON.stringify(satellite))
+        connectSocket(satellite)
+        console.log('FUCK YEAH LAD')
+        satellite.online = true
+        storedData.push(satellite)
+      }
+
+      self.satelliteData = storedData
+      
+      function connectSocket(satellite) {
+        let WebSocket = window.WebSocket || window.MozWebSocket
+        let connection = new WebSocket('ws://' + satellite.url + ':3001')
+        connection.onopen = function() {
+          console.log('Connected! : ' + connection)
+          connection.send('healthcheck')
+          //connection.send('traceroute')
+          connection.send('fucksakelad')
+        }
+        connection.onerror = function (error) {
+          console.log('Sorry, but there\'s a problem with your connection or the server is down.')
+          console.log(error)
+        }
+      }
     },
     props: {
       source: String
