@@ -1,20 +1,55 @@
 <template>
   <v-app id="inspire" dark>
-    <v-navigation-drawer
-      clipped
-      fixed
-      app
-    >
+    <v-navigation-drawer clipped fixed app>
       <v-list dense>
-        <v-list-tile @click="">
+        <v-list-tile>
           <v-list-tile-action>
-            <v-icon>dashboard</v-icon>
+            <v-list-tile-title>Satellites:</v-list-tile-title>
           </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Dashboard</v-list-tile-title>
-          </v-list-tile-content>
         </v-list-tile>
         <v-divider></v-divider>
+        <v-data-table
+          :headers="headers"
+          :items="satelliteData"
+          hide-actions
+          class="elevation-1">
+          <template slot="items" slot-scope="props">
+            <tr @click="props.expanded = !props.expanded">
+              <td>{{props.item.id}}</td>
+              <td>{{props.item.location}}</td>
+              <td>
+                <div v-if="props.item.online === true">
+                  <v-progress-circular
+                    size=20
+                    width=10
+                    rotate=360
+                    value=100
+                    class="green--text"
+                    style="margin-left: 10px;"
+                  >
+                  </v-progress-circular>
+                </div>
+                <div v-else>
+                  <v-progress-circular
+                    size=20
+                    width=10
+                    rotate=360
+                    value="100"
+                    class="red--text"
+                    style="margin-left: 10px;"
+                  >
+                  </v-progress-circular>
+                </div>
+                
+              </td>
+            </tr>
+          </template>
+          <template slot="expand" slot-scope="props">
+            <v-card flat>
+              <v-card-text>URL: {{props.item.url}}</v-card-text>
+            </v-card>
+          </template>
+        </v-data-table>
         <v-list-tile @click="">
           <v-list-tile-action>
             <v-icon>settings</v-icon>
@@ -37,7 +72,8 @@
             value=""
             class="pl-5 pr-5 pt-2"
             single-line
-            dark></v-text-field>
+            dark>
+          </v-text-field>
             <v-btn color="error" dark>Fire!</v-btn>
         </v-layout>
         </v-flex>
@@ -62,17 +98,26 @@
 
 <script>
 
-//const worldMap = require('./Map')
-
 import * as d3 from 'd3-dsv'
+import data from './data.json'
 
   export default {
-    // components: {
-    //   worldMap: worldMap
-    // },
     data: () => ({
-      drawer: null
+      drawer: null,
+      headers: [
+        {text: 'ID', value: 'id', align: 'left'},
+        {text: 'Location', value: 'location', align: 'left'},
+        {text: 'Online', value: null, align: 'left'}
+      ],
+      satelliteData: []
     }),
+    mounted() {
+      var self = this
+      for(let sat in data.satellites) {
+        console.log(sat.id)
+      }
+      self.satelliteData = data.satellites
+    },
     props: {
       source: String
     }

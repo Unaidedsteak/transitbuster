@@ -1,0 +1,37 @@
+{
+  "satellites": [
+     {
+        "id": 1,
+        "location": "New York",
+        "coord": "150x150",
+        "url": "192.168.1.101",
+        "online": true
+     },
+     {
+        "id": 2,
+        "location": "London",
+        "coord": "200x150",
+        "url": "192.168.1.102",
+        "online": true
+     },
+     {
+        "id": 3,
+        "location": "Amsterdam",
+        "coord": "300x150",
+        "url": "192.168.1.103",
+        "online": true
+     },
+     {
+        "id": 4,
+        "location": "Paris",
+        "coord": "300x150",
+        "url": "192.168.1.104"
+     },
+     {
+        "id": 5,
+        "location": "Singapore",
+        "coord": "300x150",
+        "url": "192.168.1.105"
+     }
+  ]
+}
