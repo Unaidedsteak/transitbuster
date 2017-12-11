@@ -20,10 +20,10 @@
               <td>
                 <div v-if="props.item.online === true">
                   <v-progress-circular
-                    size=20
-                    width=10
-                    rotate=360
-                    value=100
+                    :size="20"
+                    :width="10"
+                    :rotate="360"
+                    :value="100"
                     class="green--text"
                     style="margin-left: 10px;"
                   >
@@ -31,10 +31,10 @@
                 </div>
                 <div v-else>
                   <v-progress-circular
-                    size=20
-                    width=10
-                    rotate=360
-                    value="100"
+                    :size="20"
+                    :width="10"
+                    :rotate="360"
+                    :value="100"
                     class="red--text"
                     style="margin-left: 10px;"
                   >
@@ -50,14 +50,6 @@
             </v-card>
           </template>
         </v-data-table>
-        <v-list-tile @click="">
-          <v-list-tile-action>
-            <v-icon>settings</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Settings</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
       </v-list>
     </v-navigation-drawer>
     <v-toolbar app fixed clipped-left>
@@ -77,9 +69,7 @@
             <v-btn color="error" dark>Fire!</v-btn>
         </v-layout>
         </v-flex>
-        
         </v-layout>
-        
       </v-container>
     </v-toolbar>
     <v-content>
@@ -91,7 +81,7 @@
       </v-container>
     </v-content>
     <v-footer app fixed>
-      <span>&copy; 2017</span>
+      <span>&copy; 2017 Transitbuster</span>
     </v-footer>
   </v-app>
 </template>
@@ -116,35 +106,33 @@ import data from './data.json'
     mounted() {
       var self = this
       self.satelliteData = data.satellites
-      let storedData = []
-      for(let sat in data.satellites) {
-        let satellite = data.satellites[sat]
-        console.log('Satellite: ' + JSON.stringify(satellite))
-        connectSocket(satellite)
-        console.log('FUCK YEAH LAD')
-        satellite.online = true
-        storedData.push(satellite)
+      for(let satelliteIndex in self.satelliteData) {
+        this.connectSocket(satelliteIndex)
       }
-
-      self.satelliteData = storedData
       
-      function connectSocket(satellite) {
+    },
+    methods: {
+      connectSocket: function(satelliteIndex) {
+        var self = this
+        let satellite = self.satelliteData[satelliteIndex]
         let WebSocket = window.WebSocket || window.MozWebSocket
         let connection = new WebSocket('ws://' + satellite.url + ':3001')
         connection.onopen = function() {
-          console.log('Connected! : ' + connection)
+          self.satelliteData[satelliteIndex].online = true
+          console.log('Connected! : ' + self.satelliteData[satelliteIndex].location)
           connection.send('healthcheck')
-          //connection.send('traceroute')
           connection.send('fucksakelad')
         }
         connection.onerror = function (error) {
-          console.log('Sorry, but there\'s a problem with your connection or the server is down.')
+          self.satelliteData[satelliteIndex].online = false
           console.log(error)
         }
+
+        connection.onclose = function () {
+          console.log('connection closed!')
+          self.satelliteData[satelliteIndex].online = false
+        }
       }
-    },
-    props: {
-      source: String
     }
   }
 </script>
