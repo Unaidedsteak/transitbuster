@@ -1,3 +1,4 @@
+const dns = require('dns')
 const WebSocket = require('uws').Server
 const ping = require('net-ping')
 
@@ -39,7 +40,13 @@ function ipValidate (message) {
     if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip)) {
       resolve(ip)
     } else {
-      reject('Invalid IP address', ip)
+      dns.lookup(ip, (err, addr, fam) => {
+        if (err) {
+          reject('DNS Lookup failed')
+        } else {
+          resolve(addr)
+        }
+      })
     }
   })
 }
@@ -47,10 +54,9 @@ function ipValidate (message) {
 function messageValidate (message) {
   return new Promise(function (resolve, reject) {
     if (message.includes("traceroute")) {
-      console.log('this message contains traceroute', message)
+      console.log('Traceroute recieved', message)
       resolve('traceroute')
     } else {
-      console.log('Not a traceroute')
       reject('invalid command')
     }
   })
