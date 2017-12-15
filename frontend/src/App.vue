@@ -1,10 +1,13 @@
 <template>
-  <v-app id="inspire" dark>
+  <v-app dark>
     <v-navigation-drawer clipped fixed app>
       <v-list dense>
         <v-list-tile>
+          <v-list-tile-content>
+              <v-list-tile-title>Satellites:</v-list-tile-title>
+            </v-list-tile-content>
           <v-list-tile-action>
-            <v-list-tile-title>Satellites:</v-list-tile-title>
+            <v-btn flat v-on:click="refreshSockets"><v-icon>refresh</v-icon></v-btn>
           </v-list-tile-action>
         </v-list-tile>
         <v-divider></v-divider>
@@ -40,7 +43,6 @@
                   >
                   </v-progress-circular>
                 </div>
-                
               </td>
             </tr>
           </template>
@@ -61,12 +63,13 @@
           <h1 class="pt-2">Target:</h1>
           <v-text-field
             name="targetInput"
+            v-model="targetAddress"
             value=""
             class="pl-5 pr-5 pt-2"
             single-line
             dark>
           </v-text-field>
-            <v-btn color="error" dark>Fire!</v-btn>
+            <v-btn color="error" dark v-on:click="fire">Fire!</v-btn>
         </v-layout>
         </v-flex>
         </v-layout>
@@ -75,8 +78,7 @@
     <v-content>
       <v-container fluid fill-height>
         <v-layout justify-center align-center>
-          <world-map>
-          </world-map>
+          <google-map ref="googleMap"></google-map>
         </v-layout>
       </v-container>
     </v-content>
@@ -88,8 +90,8 @@
 
 <script>
 
-import * as d3 from 'd3-dsv'
 import data from './data.json'
+import axios from 'axios'
 
   export default {
     data: function () {
@@ -100,18 +102,26 @@ import data from './data.json'
           {text: 'Location', value: 'location', align: 'left'},
           {text: 'Online', value: null, align: 'left'}
         ],
-        satelliteData: []
+        satelliteData: [],
+        websocketConnections: [],
+        targetAddress: ""
       }
     },
     mounted() {
       var self = this
       self.satelliteData = data.satellites
-      for(let satelliteIndex in self.satelliteData) {
-        this.connectSocket(satelliteIndex)
-      }
-      
+      this.refreshSockets()
+
+      console.log(self.$refs.googleMap)
     },
     methods: {
+
+      refreshSockets: function() {
+        var self = this
+        for(let satelliteIndex in self.satelliteData) {
+          this.connectSocket(satelliteIndex)
+        }
+      },
       connectSocket: function(satelliteIndex) {
         var self = this
         let satellite = self.satelliteData[satelliteIndex]
@@ -121,7 +131,7 @@ import data from './data.json'
           self.satelliteData[satelliteIndex].online = true
           console.log('Connected! : ' + self.satelliteData[satelliteIndex].location)
           connection.send('healthcheck')
-          connection.send('fucksakelad')
+          self.websocketConnections.push(connection)
         }
         connection.onerror = function (error) {
           self.satelliteData[satelliteIndex].online = false
@@ -131,6 +141,28 @@ import data from './data.json'
         connection.onclose = function () {
           console.log('connection closed!')
           self.satelliteData[satelliteIndex].online = false
+        }
+
+        connection.onmessage = function (message) {
+          console.log(message.data)
+        }
+      },
+      traceTarget: function(ipAddress) {
+        console.log(ipAddress)
+      },
+
+      fire: function() {
+        var self = this 
+        let target = self.targetAddress
+        if(target != "") {
+          axios.get('http://freegeoip.net/json/' + target).then(response => {
+            self.$refs.googleMap.setTargetMarker(response.data)
+            console.log(response.data)
+            for(let i in self.websocketConnections) {
+              let websocket = self.websocketConnections[i]
+              websocket.send("traceroute:" + target)
+            }
+          })
         }
       }
     }
