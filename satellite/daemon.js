@@ -1,5 +1,5 @@
 const WebSocket = require('uws').Server
-const traceroute = require('traceroute')
+const ping = require('net-ping')
 
 var wss = new WebSocket({
   'port': 3001
@@ -13,10 +13,11 @@ wss.on('connection', function (ws) {
       console.log('Recieved command:', command)
       if (command === 'traceroute') {
         ipValidate(message).then(function (address) {
-          traceroute.trace(address, function (err, hops) {
-            console.log('Hops:', hops)
-            if (!err) ws.send(hops)
-          })
+          for (let ttl = 1; ttl < 128; ttl ++){
+            trace(address, ttl).then(function (hop) {
+              ws.send(JSON.stringify(hop))
+            })
+          }
         })
       } else {
         if (message === 'healthcheck') {
@@ -38,19 +39,40 @@ function ipValidate (message) {
     if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip)) {
       resolve(ip)
     } else {
-      reject(new Error('Invalid IP address', ip))
+      reject('Invalid IP address', ip)
     }
   })
 }
 
 function messageValidate (message) {
   return new Promise(function (resolve, reject) {
-    if (message.includes('traceroute')) {
+    if (message.includes("traceroute")) {
       console.log('this message contains traceroute', message)
       resolve('traceroute')
     } else {
       console.log('Not a traceroute')
-      reject(new Error('invalid command'))
+      reject('invalid command')
+    }
+  })
+}
+
+function trace (address, ttl) {
+  return new Promise(function(resolve, reject) {
+    let session = ping.createSession({
+      retries: 1,
+      timeout: 2000
+    })
+
+    session.traceRoute(address, ttl, feedback, done)
+
+    function feedback(error, target, ttl, sent, rcvd) {
+      let response = {"err": error, "target": target, "ttl": ttl, "sent": sent, "rcvd": rcvd}
+      resolve(response)
+    }
+
+    function done(error, target) {
+      let response = {"err": error, "target": target}
+      resolve(response)
     }
   })
 }
