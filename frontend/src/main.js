@@ -3,16 +3,16 @@ import App from './App.vue'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.css'
 
-import worldMap from './components/Map'
+import googleMap from './components/gMaps'
 
 Vue.use(Vuetify)
 
-Vue.component('world-map', worldMap)
+Vue.component('google-map', googleMap)
 
 new Vue({
   el: '#app',
   render: h => h(App),
   components: {
-    worldMap: worldMap
+    googleMap: googleMap
   }
 })

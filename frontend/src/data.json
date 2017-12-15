@@ -3,28 +3,28 @@
      {
         "id": 1,
         "location": "New York",
-        "coord": "150x150",
+        "coord": {"lat": 40.7127753, "lng": -74.0059728},
         "url": "192.168.1.101",
         "online": null
      },
      {
         "id": 2,
         "location": "London",
-        "coord": "200x150",
-        "url": "192.168.1.121",
+        "coord": {"lat": 51.5073509, "lng": -0.12775829999998223},
+        "url": "10.10.1.121",
         "online": null
      },
      {
         "id": 3,
         "location": "Amsterdam",
-        "coord": "300x150",
-        "url": "10.10.1.90",
+        "coord": {"lat": 52.3702157, "lng": 4.895167899999933},
+        "url": "178.62.45.21",
         "online": null
      },
      {
         "id": 4,
         "location": "Paris",
-        "coord": "300x150",
+        "coord": {"lat": 48.856614, "lng": 2.3522219000000177},
         "url": "192.168.1.104",
         "online": null
         
@@ -32,7 +32,7 @@
      {
         "id": 5,
         "location": "Singapore",
-        "coord": "300x150",
+        "coord": {"lat": 1.3553794, "lng": 103.86774439999999},
         "url": "192.168.1.105",
         "online": null
      }
