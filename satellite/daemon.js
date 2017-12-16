@@ -15,15 +15,20 @@ wss.on('connection', function (ws) {
       if (command === 'traceroute') {
         ipValidate(message).then(function (address) {
           for (let ttl = 1; ttl < 128; ttl ++){
-            trace(address, ttl).then(function (hop) {
+            trace(address, ttl, command).then(function (hop) {
               ws.send(JSON.stringify(hop))
             })
           }
         })
       } else {
-        if (message === 'healthcheck') {
-          console.log(message)
-          ws.send('OK')
+        if (command === 'initialize') {
+          ipValidate(message).then(function (address) {
+            for (let ttl = 1; ttl < 128; ttl ++){
+              trace(address, ttl, command).then(function (hop) {
+                ws.send(JSON.stringify(hop))
+              })
+            }
+          })
         } else {
           console.log('Invalid message', message)
           ws.send('BROKEN')
@@ -56,13 +61,16 @@ function messageValidate (message) {
     if (message.includes("traceroute")) {
       console.log('Traceroute recieved', message)
       resolve('traceroute')
-    } else {
+    } else if (message.includes("initialization")) {
+      console.log('Initialzing hops')
+      resolve('initialize')
+    } else {  
       reject('invalid command')
     }
   })
 }
 
-function trace (address, ttl) {
+function trace (address, ttl, state) {
   return new Promise(function(resolve, reject) {
     let session = ping.createSession({
       retries: 1,
@@ -73,12 +81,18 @@ function trace (address, ttl) {
 
     function feedback(error, target, ttl, sent, rcvd) {
       let response = {"err": error, "target": target, "ttl": ttl, "sent": sent, "rcvd": rcvd}
-      resolve(response)
+      if (state === 'traceroute') {
+        resolve(response)
+      } 
     }
 
     function done(error, target) {
       let response = {"err": error, "target": target}
-      resolve(response)
+      if (state === 'initialize') {
+        resolve(response)
+      } else if (state === 'initialize') {
+        resolve('hops:', response)
+      }
     }
   })
 }
