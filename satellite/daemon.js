@@ -88,7 +88,7 @@ function trace (address, ttl, state) {
 
     function done(error, target) {
       let response = {"err": error, "target": target}
-      if (state === 'initialize') {
+      if (state === 'traceroute') {
         resolve(response)
       } else if (state === 'initialize') {
         resolve('hops:', response)
