@@ -111,11 +111,8 @@ import axios from 'axios'
       var self = this
       self.satelliteData = data.satellites
       this.refreshSockets()
-
-      console.log(self.$refs.googleMap)
     },
     methods: {
-
       refreshSockets: function() {
         var self = this
         for(let satelliteIndex in self.satelliteData) {
@@ -144,23 +141,27 @@ import axios from 'axios'
         }
 
         connection.onmessage = function (message) {
-          console.log(message.data)
+        let jsonData = JSON.parse(message.data)
+          if(jsonData.err == null) {
+              console.log(message.data)
+          }
+          
         }
       },
-      traceTarget: function(ipAddress) {
-        console.log(ipAddress)
-      },
-
       fire: function() {
         var self = this 
         let target = self.targetAddress
         if(target != "") {
           axios.get('http://freegeoip.net/json/' + target).then(response => {
             self.$refs.googleMap.setTargetMarker(response.data)
-            console.log(response.data)
+            for(let i in self.satelliteData) {
+              let satellite = self.satelliteData[i]
+              self.$refs.googleMap.InitAnimations([satellite.coord.lat, satellite.coord.lng], [response.data.latitude, response.data.longitude])
+            }
             for(let i in self.websocketConnections) {
               let websocket = self.websocketConnections[i]
               websocket.send("traceroute:" + target)
+              self.$refs.googleMap.doShitLad([51.5073509, -0.12775829999998223], [response.data.latitude, response.data.longitude])
             }
           })
         }
