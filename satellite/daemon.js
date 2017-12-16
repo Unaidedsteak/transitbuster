@@ -91,7 +91,7 @@ function trace (address, ttl, state) {
       if (state === 'traceroute') {
         resolve(response)
       } else if (state === 'initialize') {
-        resolve('hops:', response)
+        resolve('initialized:', response)
       }
     }
   })
